@@ -112,23 +112,31 @@ button{
 
 /* ---------- Hotspots ---------- */
 .hotspot{
-  position:absolute;z-index:5;background:transparent;border:0;
-  border-radius:14px;cursor:pointer;padding:0;
-  transition:background .25s;
-}
-.hotspot:hover,.hotspot:focus-visible{
-  background:radial-gradient(ellipse at center,#f2d48b22,transparent 72%);
+  position:absolute;
+  z-index:5;
+  background:transparent;
+  border:0;
+  border-radius:14px;
+  cursor:pointer;
+  padding:0;
+
   outline:none;
+  -webkit-tap-highlight-color:transparent;
+  tap-highlight-color:transparent;
 }
+
+.hotspot:hover,
+.hotspot:focus,
+.hotspot:focus-visible,
+.hotspot:active{
+  background:transparent;
+  outline:none;
+  box-shadow:none;
+}
+
+/* Quitar completamente el punto amarillo */
 .hotspot::after{
-  content:"";
-  position:absolute;left:50%;top:50%;width:.7em;height:.7em;transform:translate(-50%,-50%) scale(.6);
-  border-radius:50%;background:#f8dd9b00;box-shadow:0 0 0 0 #f8dd9b00;transition:.25s;
-}
-.hotspot:hover::after{background:#f8dd9bcc;box-shadow:0 0 16px 4px #f8dd9b66;transform:translate(-50%,-50%) scale(1)}
-.stage.debug .hotspot{outline:1px solid #ff5d5d88;background:#ff5d5d14}
-.stage.debug .hotspot::before{
-  content:attr(data-id);position:absolute;left:4px;top:2px;font-size:10px;color:#ffb3b3;
+  display:none;
 }
 
 /* ---------- Primeros planos ---------- */
