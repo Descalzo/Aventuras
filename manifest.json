@@ -2,6 +2,7 @@
   "name": "Aventuras",
   "short_name": "Aventuras",
   "start_url": "./",
+  "scope": "./",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#000000",
