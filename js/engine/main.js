@@ -17,6 +17,32 @@ const SOUND_FOR = { pickup:"pickup", use:"use", dial:"dial", solve:"solve", unlo
                     wrong:"wrong", view:"open", travel:"travel", door:"door", select:"select", paper:"paper", bell:"bell",
                     combine:"solve" };
 
+
+async function enterGameMode() {
+  try {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch (e) {
+    console.log("Fullscreen no disponible:", e);
+  }
+
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock("landscape");
+    }
+  } catch (e) {
+    console.log("Bloqueo de orientación no disponible:", e);
+  }
+}  
+
+document.addEventListener("pointerdown", function firstTouch() {
+  enterGameMode();
+
+  document.removeEventListener("pointerdown", firstTouch);
+}, { once: true });
+  
+  
 /* Crónica (metaprogresión global, ver js/engine/chronicle.js y DECISIONS.md D017):
  * al terminar la fase se marca completada; cada entrada declarada en TD.data.CHRONICLE
  * se aprende en cuanto su flag es cierto. Puramente aditivo: una fase sin CHRONICLE no
