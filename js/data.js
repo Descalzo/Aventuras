@@ -9,7 +9,7 @@ window.TD = window.TD || {};
 
 /* Registro de escenarios. Un escenario es un objeto declarativo:
  *  { id, phase, name, base, enter, overlays:[], hotspots:[], closeups:{}, actions:{room,closeups,dials} } */
-TD.DEFAULT_PHASE = "clockmaker";
+TD.DEFAULT_PHASE = "piloto";
 TD.scenes = {};
 TD.registerScene = function(def){
   if(!def || !def.id) throw new Error("registerScene: falta id");
