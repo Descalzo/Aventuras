@@ -144,5 +144,14 @@
 <script src="js/engine/actions.js"></script>
 <script src="js/engine/render.js"></script>
 <script src="js/engine/main.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(reg => console.log("Service Worker registrado:", reg.scope))
+      .catch(err => console.error("Error Service Worker:", err));
+  });
+}
+</script>  
 </body>
 </html>
