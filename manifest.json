@@ -3,10 +3,8 @@
   "short_name": "Aventuras",
   "start_url": "/Aventuras/index.html",
   "scope": "/Aventuras/",
-  "display": "standalone",
-  "display_override": [
-    "fullscreen",
-    "standalone"
+  "display": "fullscreen",
+
   ],
   "orientation": "landscape",
   "background_color": "#000000",
@@ -18,7 +16,7 @@
       "type": "image/png"
     },
     {
-      "src": "/Aventuras/icons/icon-512.png",
+      "src": "/Aventuras/icons/icon-192.png",
       "sizes": "512x512",
       "type": "image/png"
     }
