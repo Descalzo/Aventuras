@@ -346,7 +346,10 @@ button{
 /* Fila compacta de botones: a la derecha de esa misma franja, nunca a todo lo
  * ancho ni pegada a la zona baja del escenario. */
 .hud-actions{
-  flex:0 0 auto;display:flex;gap:.4em;
+  flex:0 0 auto;
+  display:flex;
+  gap:.4em;
+  margin-left:auto;
 }
 .hud-actions button{
   position:relative;height:2.6em;
