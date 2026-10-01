@@ -7,7 +7,7 @@
 const PHASE_KEY = "trickyDoors.phase";
 const wanted = new URLSearchParams(location.search).get("phase");
 let remembered = null; try{ remembered = localStorage.getItem(PHASE_KEY); }catch(e){}
-const phase = TD.usePhase(wanted || remembered || TD.DEFAULT_PHASE);
+const phase = TD.usePhase(wanted || remembered || "piloto");
 try{ localStorage.setItem(PHASE_KEY, phase.id); }catch(e){}
 document.title = "Tricky Doors — "+phase.name;
 
@@ -81,7 +81,8 @@ const TAGLINE = {
   sevilla:    "Casa-palacio sevillana: abre la cancela antes de que caiga la noche.",
   derrotero:  "Palacio de Valderas: reconstruye el derrotero y el astrolabio de un piloto.",
   faro:       "Un faro abandonado en la costa: termina la sirena que dos torreros no acabaron.",
-  negado:     "El archivo de una institución que prefirió callar: encuentra el expediente correcto."
+  negado:     "El archivo de una institución que prefirió callar: encuentra el expediente correcto.",
+  piloto: "Una casa sevillana llena de secretos: reconstruye su rumbo y descubre qué ocurrió."
 };
 const phasesPanel = document.querySelector('[data-slot="phases-panel"]');
 const phasesList = document.querySelector('[data-slot="phases-list"]');
