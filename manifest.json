@@ -1,21 +1,19 @@
 {
-  "id": "./",
   "name": "Aventuras",
   "short_name": "Aventuras",
-  "start_url": "./index.html",
-  "scope": "./",
+  "start_url": "https://descalzo.github.io/Aventuras/index.html",
+  "scope": "https://descalzo.github.io/Aventuras/",
   "display": "standalone",
-  "orientation": "landscape",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "./icons/icon-192.png",
+      "src": "https://descalzo.github.io/Aventuras/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "./icons/icon-192.png",
+      "src": "https://descalzo.github.io/Aventuras/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
