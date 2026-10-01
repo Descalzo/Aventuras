@@ -1,0 +1,198 @@
+/* TRICKY DOORS — representación visual
+ * mount(handlers): construye el escenario a partir de TD.data.
+ * update(state):   sincroniza el DOM con el estado. No modifica el estado.
+ *
+ * Los elementos de interfaz se localizan por `data-slot`, no por su posición
+ * en el documento, para poder mover inventario/notas/progreso dentro del
+ * escenario (barra inferior) sin tocar este módulo.
+ */
+window.TD = window.TD || {};
+
+TD.render = (function(){
+const D = TD.data;
+const slot = name => document.querySelector('[data-slot="'+name+'"]');
+
+let H = {};                 // handlers de interacción
+const overlayEls = {};      // id -> { img, ph }
+const missing = new Set();  // ids de overlays cuya imagen no existe (asset fallido)
+const roomHotspots = [];    // { def, el }
+const closeupHotspots = []; // { def, el, view }
+let dialEls = [];
+let els = {};
+
+function applyRect(el, r){
+  el.style.left=r.left+"%"; el.style.top=r.top+"%";
+  el.style.width=r.width+"%"; el.style.height=r.height+"%";
+}
+function makeHotspot(def){
+  const b=document.createElement("button");
+  b.type="button"; b.className="hotspot"; b.dataset.id=def.id;
+  b.setAttribute("aria-label",def.label); b.title=def.label;
+  applyRect(b,def.rect);
+  return b;
+}
+
+/* ---------- construcción ---------- */
+function mount(handlers){
+  H = handlers;
+  els = {
+    stage: slot("stage"), roomView: slot("room"), closeupView: slot("closeup"),
+    layers: slot("layers"), hotspots: slot("hotspots"),
+    closeupImg: slot("closeup-image"), closeupHs: slot("closeup-hotspots"),
+    dials: slot("dials"), back: slot("back"),
+    message: slot("message"), inventory: slot("inventory"),
+    notes: slot("notes"), progress: slot("progress"),
+    ending: slot("ending")
+  };
+
+  // capas (el orden del array define el apilado z-index)
+  D.OVERLAYS.forEach((o,i)=>{
+    const img=document.createElement("img");
+    img.className="layer overlay"; img.src=o.src; img.alt=""; img.dataset.id=o.id;
+    img.style.zIndex = 1+i;
+    // Si la imagen falla a cargar, notamos el asset faltante y mostramos fallback si existe.
+    img.addEventListener("error",()=>{ missing.add(o.id); if(H.onAssetMissing) H.onAssetMissing(o.id); });
+    const ph=document.createElement("div");
+    ph.className="placeholder ph-"+o.id; ph.style.zIndex = 1+i; applyRect(ph,o.rect);
+    ph.innerHTML='<span class="tag">'+o.label+'</span>';
+    els.layers.appendChild(img); els.layers.appendChild(ph);
+    overlayEls[o.id]={img,ph};
+  });
+
+  // hotspots de la habitación
+  D.HOTSPOTS.forEach(def=>{
+    const el=makeHotspot(def);
+    el.addEventListener("click",()=>H.onRoomHotspot(def.id));
+    els.hotspots.appendChild(el);
+    roomHotspots.push({def,el});
+  });
+
+  // hotspots de primeros planos
+  Object.keys(D.CLOSEUPS).forEach(view=>{
+    D.CLOSEUPS[view].hotspots.forEach(def=>{
+      const el=makeHotspot(def);
+      el.addEventListener("click",()=>H.onCloseupHotspot(view,def.id));
+      els.closeupHs.appendChild(el);
+      closeupHotspots.push({def,el,view});
+    });
+  });
+
+  // ruedas de la caja fuerte
+  dialEls = D.SAFE_DIALS.map((d,i)=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="dial"; b.dataset.index=i; applyRect(b,d);
+    b.title="Girar rueda (clic: +1, clic derecho: -1)";
+    b.addEventListener("click",()=>H.onDial(i,+1));
+    b.addEventListener("contextmenu",e=>{ e.preventDefault(); H.onDial(i,-1); });
+    els.dials.appendChild(b);
+    return b;
+  });
+
+  // progreso
+  els.progress.innerHTML="";
+  D.PROGRESS.forEach(p=>{
+    const row=document.createElement("div");
+    row.className="row"; row.innerHTML='<span class="dot" data-key="'+p.key+'"></span>'+p.label;
+    els.progress.appendChild(row);
+  });
+
+  els.back.addEventListener("click",()=>H.onBack());
+}
+
+/* ---------- sincronización ---------- */
+function update(state){
+  renderLayers(state);
+  renderHotspots(state);
+  renderViews(state);
+  renderInventory(state);
+  renderNotes(state);
+  renderProgress(state);
+  els.message.textContent = state.message;
+  els.ending.hidden = !state.doorOpen;
+}
+
+/* Capas: una capa se ve si su when(state) es cierto.
+ * Si la imagen del overlay falla a cargar (missing.has(id)):
+ *   - Se muestra el placeholder con etiqueta de fallback.
+ *   - Además, si tiene `fallback`, se muestra también esa capa (si no falta).
+ * Esto evita inconsistencias visuales cuando un asset no carga.
+ */
+function renderLayers(state){
+  const active = new Set(D.OVERLAYS.filter(o=>o.when(state)).map(o=>o.id));
+  const shown = new Set();
+  const placeholders = new Set();
+  active.forEach(id=>{
+    if(!missing.has(id)){ shown.add(id); return; }
+    placeholders.add(id);
+    const fb = D.OVERLAYS.find(o=>o.id===id).fallback;
+    if(fb && !missing.has(fb)) shown.add(fb);
+  });
+  D.OVERLAYS.forEach(o=>{
+    const {img,ph}=overlayEls[o.id];
+    img.classList.toggle("visible", shown.has(o.id));
+    ph.classList.toggle("visible", placeholders.has(o.id));
+  });
+}
+
+function renderHotspots(state){
+  roomHotspots.forEach(({def,el})=>{ el.hidden = def.when ? !def.when(state) : false; });
+  closeupHotspots.forEach(({def,el,view})=>{
+    el.hidden = view!==state.view || (def.when ? !def.when(state) : false);
+  });
+}
+
+function renderViews(state){
+  const inRoom = state.view==="room";
+  els.roomView.hidden = !inRoom;
+  els.closeupView.hidden = inRoom;
+  if(inRoom) return;
+  const cu = D.CLOSEUPS[state.view];
+  const src = cu.image(state);
+  if(els.closeupImg.getAttribute("src")!==src) els.closeupImg.src=src;
+  els.dials.hidden = !cu.dials;
+  if(cu.dials) dialEls.forEach((b,i)=>{ b.textContent=state.safeDigits[i]; });
+}
+
+function renderInventory(state){
+  const box=els.inventory;
+  box.innerHTML="";
+  if(!state.items.length){ box.innerHTML='<div class="empty">Vacío</div>'; return; }
+  state.items.forEach(id=>{
+    const d=D.ITEMS[id];
+    const b=document.createElement("button");
+    b.type="button"; b.className="item"+(state.selected===id?" selected":""); b.dataset.id=id;
+    b.innerHTML='<img src="'+d.img+'" alt="">'+d.icon+'<span>'+d.name+'</span>';
+    const img=b.querySelector("img"), svg=b.querySelector("svg");
+    svg.style.display="none";
+    img.addEventListener("error",()=>{ img.classList.add("missing"); svg.style.display="block"; });
+    b.addEventListener("click",()=>H.onItem(id));
+    box.appendChild(b);
+  });
+}
+
+function renderNotes(state){
+  const notes = D.NOTES.filter(n=>n.when(state)).map(n=>n.text);
+  els.notes.innerHTML = notes.length ? notes.join("<br><br>") : D.NOTES_EMPTY;
+}
+
+function renderProgress(state){
+  els.progress.querySelectorAll(".dot").forEach(dot=>{
+    dot.classList.toggle("done", !!state[dot.dataset.key]);
+  });
+}
+
+function toggleDebug(){ els.stage.classList.toggle("debug"); }
+
+/* Estado visual calculado (útil para pruebas): qué capas se ven realmente.
+ * Útiles para depurar el sistema de overlays y fallbacks cuando assets faltan.
+ */
+function visibleLayers(){
+  return Object.keys(overlayEls).filter(id=>overlayEls[id].img.classList.contains("visible"));
+}
+function visiblePlaceholders(){
+  return Object.keys(overlayEls).filter(id=>overlayEls[id].ph.classList.contains("visible"));
+}
+function markMissing(id){ missing.add(id); }
+
+return { mount, update, toggleDebug, visibleLayers, visiblePlaceholders, markMissing, missing };
+})();

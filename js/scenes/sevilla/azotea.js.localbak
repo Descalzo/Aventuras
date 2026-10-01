@@ -1,0 +1,163 @@
+/* TRICKY DOORS — Sevilla: Azotea
+ * Veleta sirena (orientación con la rosa de los vientos) y espadaña de tres campanas
+ * (secuencia). Con la sirena al Lebeche y el toque correcto se abre la cancela del patio.
+ * Coordenadas en % de la escena (1672x941).
+ */
+(function(){
+const S = TD.state;
+const F = k => s => !!s.flags[k];
+const A = "assets/sevilla/azotea/";
+const pct = (x0,y0,x1,y1)=>({left:+(x0/16.72).toFixed(1), top:+(y0/9.41).toFixed(1), width:+((x1-x0)/16.72).toFixed(1), height:+((y1-y0)/9.41).toFixed(1)});
+
+/* Vientos en sentido horario desde el norte; la sirena gira 45° por paso. */
+const WINDS = ["TRAMONTANA","GREGAL","LEVANTE","JALOQUE","MEDIODÍA","LEBECHE","PONIENTE","MAESTRAL"];
+const VANE_CODE = "LEBECHE";
+/* Centro real de la rosa de latón en el primer plano. */
+const ROSE = {x:836, y:310, r:280};
+/* Sirena de forja dibujada por código (silueta vista desde arriba) que gira sobre la rosa:
+ * cabeza y brazo extendido hacia el viento elegido; 0 = Tramontana (arriba). */
+function sirena(s){
+  const deg = ((s.dials.vane || [0])[0] || 0) * 45;
+  return '<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">'+
+    '<g transform="rotate('+deg+' 200 200)" fill="#2a2118" stroke="#c9a55c" stroke-width="2" stroke-linejoin="round">'+
+    /* cola de pez, cuerpo, cabeza y brazo: una aguja de veleta con forma de sirena */
+    '<path d="M200 330 L186 356 L200 348 L214 356 Z"/>'+
+    '<path d="M194 330 C186 300 188 260 194 232 L206 232 C212 260 214 300 206 330 Z"/>'+
+    '<path d="M192 232 C186 216 190 200 200 196 C210 200 214 216 208 232 Z"/>'+
+    '<circle cx="200" cy="180" r="11"/>'+
+    '<path d="M203 196 C214 186 222 160 226 128 L232 92 L224 90 L216 126 C212 150 206 172 203 186 Z"/>'+
+    '<path d="M197 196 C190 190 186 178 186 168 L192 166 C193 176 196 186 199 192 Z"/>'+
+    '<circle cx="200" cy="200" r="7" fill="#c9a55c" stroke="#5a4426"/>'+
+    '</g></svg>';
+}
+function roseLabels(){
+  let out = '<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">';
+  WINDS.forEach((w,i)=>{
+    const a = (i*45-90)*Math.PI/180, x = 200+150*Math.cos(a), y = 200+150*Math.sin(a);
+    out += '<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="middle" dominant-baseline="middle" font-family="Georgia,serif" font-size="11" fill="#f3e6c4" stroke="#1a1208" stroke-width="2" paint-order="stroke">'+w+'</text>';
+  });
+  return out+'</svg>';
+}
+
+/* Toque: grande, chica, mediana. Se guarda en dials.toque como [a,b,c] con 1=chica, 2=mediana, 3=grande (0 = vacío). */
+const BELL = { chica:1, mediana:2, grande:3 };
+const TOQUE = [BELL.grande, BELL.chica, BELL.mediana];
+function ring(name){
+  return function(s){
+    if(name==="grande" && !s.flags.ropeInstalled){
+      if(!s.flags.clapperInstalled) S.say("La campana grande no tiene badajo: por más que la empujes, no suena.");
+      else S.say("La campana grande ya tiene badajo, pero sin cuerda no hay forma de voltearla.");
+      S.emit("wrong");
+      return;
+    }
+    if(s.flags.toqueDone){ S.say("Las campanas ya han hecho su trabajo. Abajo, la cancela espera."); return; }
+    const seq = S.dial("toque", 3);
+    const i = seq.indexOf(0);
+    seq[i===-1 ? 2 : i] = BELL[name];
+    S.emit("bell",{bell:name});
+    S.say({chica:"La campana chica responde, aguda.", mediana:"La mediana suena, redonda.", grande:"La grande retumba sobre los tejados."}[name]);
+    if(!seq.includes(0)){
+      const okSeq = seq.every((v,k)=>v===TOQUE[k]);
+      if(okSeq && s.flags.vaneSet){
+        s.flags.toqueDone=true; s.flags.cancelaOpen=true;
+        S.emit("solve"); S.emit("door");
+        S.say("Grande, chica, mediana: el toque de la casa. Abajo, en el patio, se oyen los cerrojos de la cancela retirarse uno a uno.");
+      }else if(okSeq){
+        S.say("Ese toque tiene sentido, pero abajo nada se mueve. La sirena sigue mirando a tierra.");
+        seq.fill(0);
+      }else{
+        S.emit("wrong");
+        S.say("Las tres campanas se apagan sin que nada responda. Ese no es el toque.");
+        seq.fill(0);
+      }
+    }
+  };
+}
+
+TD.registerScene({
+  id:"azotea",
+  phase:"sevilla",
+  name:"Azotea",
+  base: A+"room_base.webp",
+  enter: "La azotea. Ha caído la noche sobre los tejados; al fondo, la torre de la ciudad. Una espadaña con tres campanas y una veleta con forma de sirena.",
+  backMessage: "Vuelves a mirar la azotea.",
+
+  overlays:[],
+
+  hotspots:[
+    { id:"stairs_down", label:"Bajar al patio",     rect:pct(105,255,300,750),   goto:"patio", message:"Bajas la escalera de azulejos hasta el patio." },
+    { id:"bells",       label:"Espadaña",           rect:pct(750,180,1200,520),  closeup:"bells" },
+    { id:"vane",        label:"Veleta de la sirena", rect:pct(1440,110,1600,350), closeup:"vane" },
+    { id:"tower",       label:"Torre de la ciudad", rect:pct(1280,250,1380,520) },
+    { id:"table",       label:"Mesa y farolillos",  rect:pct(700,560,1150,800) }
+  ],
+
+  closeups:{
+    bells:{
+      label:"Espadaña",
+      image: A+"closeup_bells.webp",
+      layers:[
+        { id:"clapper", src:A+"closeup_bells_clapper.webp", when:F("clapperInstalled"), rect:pct(1040,520,1230,625), label:"badajo" },
+        { id:"rope",    src:A+"closeup_bells_rope.webp",    when:F("ropeInstalled"),    rect:pct(1075,600,1170,941), label:"cuerda" }
+      ],
+      hotspots:[
+        { id:"grande_mouth", label:"Campana grande (boca)", rect:pct(1000,370,1240,630), when:s=>!s.flags.clapperInstalled },
+        { id:"grande_rope",  label:"Campana grande (cuerda)", rect:pct(1040,630,1200,941), when:s=>s.flags.clapperInstalled && !s.flags.ropeInstalled },
+        { id:"chica",   label:"Campana chica",   rect:pct(470,380,620,900) },
+        { id:"mediana", label:"Campana mediana", rect:pct(720,360,900,900) },
+        { id:"grande",  label:"Campana grande",  rect:pct(1000,370,1240,941), when:F("ropeInstalled") }
+      ]
+    },
+    vane:{
+      label:"Veleta de la sirena",
+      image: A+"closeup_vane.webp",
+      html:[
+        { rect:pct(ROSE.x-ROSE.r*1.1, ROSE.y-ROSE.r*1.1, ROSE.x+ROSE.r*1.1, ROSE.y+ROSE.r*1.1), cls:"rose", content:roseLabels },
+        { rect:pct(ROSE.x-ROSE.r*0.62, ROSE.y-ROSE.r*0.62, ROSE.x+ROSE.r*0.62, ROSE.y+ROSE.r*0.62), cls:"sirena", content:sirena }
+      ],
+      dials:{
+        id:"vane", code:VANE_CODE, flag:"vaneSet",
+        when:s=>!s.flags.vaneSet,
+        symbols:[WINDS],
+        help:"La sirena gira sobre la rosa: clic avanza un viento, clic derecho retrocede",
+        positions:[ pct(1240,760,1560,850) ]
+      }
+    }
+  },
+
+  actions:{
+    room:{
+      tower(s){ S.say("La torre de la ciudad, iluminada, se alza sobre los tejados. Desde aquí el río no se ve, pero se adivina hacia el poniente."); },
+      table(s){ S.say("Una mesa de forja con un tablero de azulejos y farolillos encendidos. Alguien cenaba aquí las noches de verano."); }
+    },
+    closeups:{
+      bells:{
+        grande_mouth(s){
+          if(S.useSelected("clapper")){
+            s.flags.clapperInstalled=true; S.emit("use");
+            S.say("Cuelgas el badajo de la argolla interior de la campana grande. Falta una cuerda para voltearla.");
+          }else{
+            if(s.selected) S.emit("wrong");
+            S.say("La campana grande está muda: no tiene badajo. Dentro se ve la argolla vacía.");
+          }
+        },
+        grande_rope(s){
+          if(S.useSelected("rope")){
+            s.flags.ropeInstalled=true; S.emit("use");
+            S.say("Atas la soga al yugo de la campana grande. Ahora las tres campanas pueden tocarse.");
+          }else{
+            if(s.selected) S.emit("wrong");
+            S.say("Del yugo de la campana grande cuelga una argolla sin cuerda.");
+          }
+        },
+        chica: ring("chica"),
+        mediana: ring("mediana"),
+        grande: ring("grande")
+      }
+    },
+    dials:{
+      vane(s){ S.emit("unlock"); S.say("La sirena queda mirando al Lebeche, hacia la mar. Se oye un chasquido en el eje de la veleta."); }
+    }
+  }
+});
+})();

@@ -1,0 +1,142 @@
+/* TRICKY DOORS — datos del juego
+ * Contenido declarativo: assets, capas, hotspots, objetos, textos derivados.
+ * La lógica (js/actions.js) decide qué cambia; el render (js/render.js) decide cómo se ve.
+ * Coordenadas en % respecto a la escena (1672x941).
+ */
+window.TD = window.TD || {};
+
+TD.data = (function(){
+
+const ASSETS = {
+  roomBase: "assets/room_base.webp",
+  closeups: {
+    drawerClosed: "assets/closeup_drawer_closed.webp",
+    drawerOpen:   "assets/closeup_drawer_open.webp",
+    drawerEmpty:  "assets/closeup_drawer_empty.webp",
+    safe:         "assets/closeup_safe.webp"
+  }
+};
+
+/* Overlays transparentes sobre room_base.webp.
+ *
+ * when(state) -> true si la capa debe verse. Permite estados acumulativos
+ *                 (drawer_open + picture_moved pueden coexistir) y exclusivos
+ *                 (picture_moved se oculta cuando safe_open lo sustituye).
+ * El ORDEN del array es el orden de apilado (el último queda encima, mayor z-index).
+ * Si una imagen falla a cargar, se muestra su placeholder y su fallback (si existe).
+ */
+const OVERLAYS = [
+  { id:"drawer_open",    src:"assets/drawer_open.webp",
+    when:s=>s.drawerOpen,
+    rect:{left:18,top:52.8,width:16.2,height:15.5}, label:"cajón abierto" },
+
+  { id:"panel_powered",  src:"assets/panel_powered.webp",
+    when:s=>s.panelPowered,
+    rect:{left:69.4,top:25.5,width:9.6,height:21.8}, label:"panel_powered.webp pendiente" },
+
+  { id:"clock_repaired", src:"assets/clock_repaired.webp",
+    when:s=>s.clockRepaired,
+    rect:{left:35,top:1.6,width:16.5,height:35}, label:"clock_repaired.webp pendiente" },
+
+  { id:"picture_moved",  src:"assets/picture_moved.webp",
+    when:s=>s.pictureMoved && !s.safeOpen,            // exclusivo con safe_open:
+                                                       // se usa !s.safeOpen porque la lógica
+                                                       // de estados no tiene un modo "exclusivo" nativo.
+                                                       // Cuando safeOpen es true, pictureMoved debe ser false.
+    rect:{left:52.4,top:5,width:19.2,height:37.3}, label:"cuadro desplazado" },
+
+  { id:"safe_open",      src:"assets/safe_open.webp",
+    when:s=>s.safeOpen,                               // sustituye a picture_moved
+    fallback:"picture_moved",                         // si safe_open no carga, muestra el placeholder de picture_moved
+                                                       // para evitar inconsistencia visual (caja fuerte sin retrato).
+    rect:{left:53.8,top:12.5,width:9.5,height:25}, label:"safe_open.webp pendiente" },
+
+  { id:"door_open",      src:"assets/door_open.webp",
+    when:s=>s.doorOpen,
+    rect:{left:82.5,top:7,width:15,height:80}, label:"door_open.webp pendiente" }
+];
+
+/* Objetos de inventario. `icon` es un SVG de respaldo si falta la imagen. */
+const ITEMS = {
+  smallKey:{ name:"Llave pequeña",    img:"assets/item_small_key.webp",
+    icon:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="15" cy="24" r="8"/><path d="M23 24h20M37 24v7M31 24v5"/></svg>' },
+  gear:{     name:"Engranaje",        img:"assets/item_gear.webp",
+    icon:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3"><circle cx="24" cy="24" r="7"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M9.9 9.9l4.2 4.2M33.9 33.9l4.2 4.2M9.9 38.1l4.2-4.2M33.9 14.1l4.2-4.2"/><circle cx="24" cy="24" r="15"/></svg>' },
+  fuse:{     name:"Fusible",          img:"assets/item_fuse.webp",
+    icon:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><rect x="6" y="18" width="36" height="12" rx="6"/><path d="M6 24H2M46 24h-4M18 24h12"/></svg>' },
+  doorKey:{  name:"Llave ornamentada",img:"assets/item_door_key.webp",
+    icon:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="13" cy="24" r="9"/><circle cx="13" cy="24" r="3"/><path d="M22 24h24M40 24v8M34 24v6M28 24v4"/></svg>' }
+};
+
+/* Hotspots de la habitación. `when(state)` decide si se muestra. */
+const HOTSPOTS = [
+  { id:"plant",   label:"Examinar maceta",           rect:{left:0,   top:40,  width:9,   height:37} },
+  { id:"drawer",  label:"Examinar cajón",            rect:{left:19,  top:56,  width:14,  height:11} },
+  { id:"clock",   label:"Examinar reloj",            rect:{left:35,  top:2,   width:17,  height:35} },
+  { id:"picture", label:"Examinar retrato",          rect:{left:54,  top:7.5, width:14,  height:31}, when:s=>!s.pictureMoved },
+  { id:"picture", label:"Examinar retrato",          rect:{left:62,  top:6,   width:9,   height:34}, when:s=>s.pictureMoved },
+  { id:"safe",    label:"Examinar caja fuerte",      rect:{left:54,  top:12.5,width:9,   height:25}, when:s=>s.pictureMoved },
+  { id:"panel",   label:"Examinar cuadro eléctrico", rect:{left:69.5,top:25.5,width:10,  height:22} },
+  { id:"door",    label:"Examinar puerta",           rect:{left:82.5,top:8,   width:15.5,height:75} }
+];
+
+/* Vistas de primer plano: qué imagen se muestra según el estado y sus hotspots. */
+const CLOSEUPS = {
+  drawer: {
+    image: s => !s.drawerOpen ? ASSETS.closeups.drawerClosed
+              : (s.noteTaken ? ASSETS.closeups.drawerEmpty : ASSETS.closeups.drawerOpen),
+    hotspots: [
+      { id:"lock", label:"Cerradura del cajón", rect:{left:21,top:52,width:59,height:22}, when:s=>!s.drawerOpen },
+      { id:"note", label:"Coger la nota",       rect:{left:37,top:52,width:17,height:11}, when:s=>s.drawerOpen && !s.noteTaken }
+    ]
+  },
+  safe: {
+    image: s => ASSETS.closeups.safe,
+    hotspots: [],
+    dials: true
+  }
+};
+
+/* Ruedas numéricas sobre closeup_safe.webp (posición de cada "0" en la imagen). */
+const SAFE_DIALS = [
+  { left:40.3, top:41.4, width:3.4, height:10.6 },
+  { left:44.2, top:41.4, width:3.4, height:10.6 },
+  { left:47.9, top:41.4, width:3.4, height:10.6 },
+  { left:51.7, top:41.4, width:3.4, height:10.6 }
+];
+const SAFE_CODE = "0825";
+
+/* Textos derivados del estado (panel de notas). */
+const NOTE_TEXT = "Cuando el reloj se detuvo, marcaba las 08:25. El retrato esconde aquello que el tiempo olvidó.";
+const NOTES = [
+  { when:s=>s.noteTaken,                    text:"La nota dice: “"+NOTE_TEXT+"”" },
+  { when:s=>s.pictureMoved && !s.safeOpen,  text:"Tras el retrato hay una caja fuerte con cuatro ruedas numéricas." },
+  { when:s=>s.safeOpen,                     text:"La caja fuerte contenía un engranaje y un fusible." },
+  { when:s=>s.clockRepaired,                text:"El reloj vuelve a funcionar. Soltó una llave ornamentada." },
+  { when:s=>s.panelPowered,                 text:"La cerradura electrónica vuelve a tener corriente." }
+];
+const NOTES_EMPTY = "Aún no has encontrado ninguna pista.";
+
+/* Indicadores de progreso. */
+const PROGRESS = [
+  { key:"drawerOpen",    label:"Cajón" },
+  { key:"safeOpen",      label:"Caja fuerte" },
+  { key:"clockRepaired", label:"Reloj" },
+  { key:"panelPowered",  label:"Electricidad" },
+  { key:"doorOpen",      label:"Puerta" }
+];
+
+const HINTS = [
+  "Empieza por algo que pueda esconder un objeto pequeño.",
+  "La llave que has encontrado parece demasiado pequeña para la puerta.",
+  "Lee atentamente la nota del cajón.",
+  "08:25 puede convertirse directamente en un código de cuatro cifras: 0825.",
+  "Los dos objetos de la caja fuerte sirven para mecanismos diferentes.",
+  "La puerta necesita corriente además de una llave."
+];
+
+const INTRO_TEXT = "La puerta está cerrada. Hay algo extraño en esta habitación.";
+
+return { ASSETS, OVERLAYS, ITEMS, HOTSPOTS, CLOSEUPS, SAFE_DIALS, SAFE_CODE,
+         NOTE_TEXT, NOTES, NOTES_EMPTY, PROGRESS, HINTS, INTRO_TEXT };
+})();

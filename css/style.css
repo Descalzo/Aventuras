@@ -1,0 +1,433 @@
+/* TRICKY DOORS — estilos */
+:root{
+  --bg:#090b0e;
+  --text:#f2f4f7;
+  --muted:#aab2bf;
+  --accent:#c9a55c;
+  --ok:#63a578;
+  /* relación de aspecto real de las escenas (1672x941) */
+  --scene-ratio: 1672 / 941;
+  /* margen superior reservado para la fila de botones/mensaje (ver .hud-actions,
+   * .message) — ya NO hay franja inferior fija: la parte baja del escenario queda
+   * siempre libre para hotspots. */
+  --top-safe: 8.5%;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:14px}
+button{font:inherit}
+
+/* el escenario debe caber entero en pantalla: limitado por ancho y por alto (16:9) */
+.game{width:min(1360px, 100%, calc((100vh - 28px) * 1672 / 941))}
+
+/* ---------- Escenario ---------- */
+.stage{
+  position:relative;
+  aspect-ratio:var(--scene-ratio);
+  overflow:hidden;
+  border-radius:18px;
+  background:#090b0d;
+  box-shadow:0 18px 60px #000a;
+  border:1px solid #262c35;
+  user-select:none;
+  font-size:clamp(11px, 1.05cqw + 4px, 16px);
+  container-type:inline-size;
+}
+.stage.flash::after{
+  content:"";position:absolute;inset:0;z-index:7;pointer-events:none;
+  background:radial-gradient(circle at center,#ffd88a55,transparent 70%);
+  animation:flash .6s ease-out forwards;
+}
+@keyframes flash{from{opacity:1}to{opacity:0}}
+
+.view{position:absolute;inset:0}
+.view[hidden]{display:none}
+.scene,.closeup-view{position:absolute;inset:0}
+.scene[hidden],.closeup-view[hidden]{display:none}
+/* Escenas espejadas (scene.mirror): la imagen y sus hotspots/placeholders se
+   voltean juntos para que la puerta de entrada quede en el lado coherente con
+   el escenario desde el que se llega. Los textos auxiliares se vuelven a voltear. */
+.scene.mirror{transform:scaleX(-1)}
+.scene.mirror .placeholder .tag{transform:translateX(-50%) scaleX(-1)}
+.stage.debug .scene.mirror .hotspot::before{transform:scaleX(-1);left:auto;right:4px}
+.layer{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:fill;          /* la escena y los overlays tienen exactamente la misma resolución */
+  pointer-events:none;
+}
+.layer.base{z-index:0}
+.layer.overlay{z-index:1;opacity:0;transition:opacity .5s ease}
+.layer.overlay.visible{opacity:1}
+.layer.missing{display:none}
+.closeup-view .missing-tag{
+  display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:2;color:#ffd88a;background:rgba(0,0,0,.7);padding:.5em 1em;border-radius:8px;
+  border:1px dashed #ffd88a77;font-size:.9em;
+}
+.closeup-view.missing{background:radial-gradient(circle at center,#1c2028,#0b0d10)}
+.closeup-view.missing .missing-tag{display:block}
+
+/* Placeholders para capas cuya imagen aún no existe */
+.placeholder{
+  position:absolute;z-index:2;pointer-events:none;
+  border:1px dashed rgba(255,255,255,.35);border-radius:8px;
+  opacity:0;transition:opacity .45s ease;
+}
+.placeholder.visible{opacity:1}
+.placeholder .tag{
+  position:absolute;left:50%;bottom:6px;transform:translateX(-50%);
+  font-size:10px;padding:2px 6px;border-radius:6px;white-space:nowrap;
+  background:rgba(0,0,0,.75);color:#ffd88a;border:1px solid #ffd88a55;
+}
+
+.vignette{
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(circle at center,transparent 55%,rgba(0,0,0,.55) 100%);
+}
+
+/* ---------- Hotspots ---------- */
+.hotspot{
+  position:absolute;z-index:5;background:transparent;border:0;
+  border-radius:14px;cursor:pointer;padding:0;
+  transition:background .25s;
+}
+.hotspot:hover,.hotspot:focus-visible{
+  background:radial-gradient(ellipse at center,#f2d48b22,transparent 72%);
+  outline:none;
+}
+.hotspot::after{
+  content:"";
+  position:absolute;left:50%;top:50%;width:.7em;height:.7em;transform:translate(-50%,-50%) scale(.6);
+  border-radius:50%;background:#f8dd9b00;box-shadow:0 0 0 0 #f8dd9b00;transition:.25s;
+}
+.hotspot:hover::after{background:#f8dd9bcc;box-shadow:0 0 16px 4px #f8dd9b66;transform:translate(-50%,-50%) scale(1)}
+.stage.debug .hotspot{outline:1px solid #ff5d5d88;background:#ff5d5d14}
+.stage.debug .hotspot::before{
+  content:attr(data-id);position:absolute;left:4px;top:2px;font-size:10px;color:#ffb3b3;
+}
+
+/* ---------- Primeros planos ---------- */
+.back{
+  position:absolute;z-index:9;left:14px;top:14px;
+  border:1px solid #ffffff33;color:#fff;background:rgba(7,9,12,.7);backdrop-filter:blur(8px);
+  border-radius:10px;padding:.5em .9em;cursor:pointer;font-size:.95em;
+}
+.back:hover{background:rgba(30,34,40,.85)}
+
+/* Texto HTML posicionado sobre un primer plano (notas, placas, esferas) */
+.cu-html{position:absolute;z-index:4;pointer-events:none}
+.cu-html[hidden]{display:none}
+.cu-html.paper{
+  font:italic 1em/1.45 "Georgia","Times New Roman",serif;color:#3b2a16;
+  text-shadow:0 0 1px #0002;
+}
+.cu-html.plate{
+  display:flex;align-items:center;justify-content:center;
+  font:700 1.15em/1 "Georgia",serif;color:#2a2114;letter-spacing:.12em;white-space:nowrap;
+  text-shadow:0 1px 0 #e9d9a8,0 -1px 0 #4a3b1c;
+}
+.cu-html svg{width:100%;height:100%;display:block}
+.cu-html.engraved{
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font:700 1.25em/1.5 "Georgia",serif;color:#3a2d16;letter-spacing:.08em;
+  text-shadow:0 1px 0 #d8c08a,0 -1px 0 #2a2010;
+}
+.cu-html.paper b{display:block;margin-bottom:.3em;font-style:normal;letter-spacing:.04em}
+
+/* Textos por código de la fase sevillana */
+.cu-html.numeral{
+  display:flex;align-items:center;justify-content:center;
+  font:700 1.6em/1 "Georgia",serif;color:#1d2f6b;letter-spacing:.04em;
+  text-shadow:0 1px 0 #ffffff88,0 0 6px #ffffff66;
+}
+.cu-html.map-label{
+  display:flex;align-items:center;justify-content:center;
+  font:italic 700 1.05em/1 "Georgia",serif;color:#3a2814;letter-spacing:.12em;
+  text-shadow:0 0 4px #f1e2bd,0 0 8px #f1e2bd;white-space:nowrap;
+}
+.cu-html.cartouche{font-size:.95em;padding:.6em .8em}
+.cu-html.rose svg,.cu-html.ring svg{overflow:visible}
+
+/* Feedback visual de piezas que se colocan/encajan en orden (p.ej. el códice de las
+ * estaciones en Derrotero): cada zona muestra un marco dorado + etiqueta en cuanto
+ * queda "encajada", para que el progreso -y el reinicio si se falla el orden- se vea
+ * de un vistazo, no solo por un mensaje de texto pasajero. */
+.season-placed{
+  position:absolute;inset:-3%;border-radius:10px;
+  border:.3em solid #f8dd9bcc;box-shadow:0 0 22px #f8dd9b77, inset 0 0 22px #f8dd9b33;
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:4%;
+  animation:pop .4s cubic-bezier(.2,1.4,.4,1);
+}
+.season-label{
+  background:#1a1408e6;color:#f8dd9b;border:1px solid #f8dd9b88;
+  padding:.25em .8em;border-radius:1em;font:700 .85em "Georgia",serif;letter-spacing:.05em;
+}
+
+/* Ruedas / mecanismos de símbolos */
+.dials{position:absolute;inset:0;z-index:6;pointer-events:none}
+.dials[hidden]{display:none}
+.dial{
+  position:absolute;pointer-events:auto;
+  display:flex;align-items:center;justify-content:center;
+  font:700 clamp(14px,3.6cqw,44px)/1 "Georgia",serif;color:#f4e2b8;
+  background:linear-gradient(180deg,#1a1712,#3a3125 45%,#1a1712);
+  border:1px solid #c9a55c99;border-radius:6px;cursor:pointer;
+  text-shadow:0 0 6px #ffd88a99;box-shadow:inset 0 0 12px #000c,0 0 10px #0009;
+  transition:transform .12s;
+}
+.dial:hover{transform:scale(1.05)}
+.dial:active{transform:scale(.96)}
+/* Dial resuelto y bloqueado (p.ej. la puerta de medallones una vez acertada): sin esto,
+ * `b.disabled` en render.js impedía el clic pero el botón seguía viéndose idéntico a uno
+ * activo, sin ninguna pista visual de que ya no responde. */
+.dial:disabled{cursor:not-allowed;filter:grayscale(45%) brightness(.85);pointer-events:none;transform:none}
+/* Palabras largas (p.ej. nombres de vientos) desbordaban la caja pensada para símbolos cortos. */
+.dial.dial-word{font-size:clamp(9px,1.7cqw,20px);letter-spacing:.02em;padding:0 .2em}
+/* Medallones con imagen propia (p.ej. azulejos de la puerta del taller): el propio asset ya
+ * es el medallón cerámico, así que se retira la placa oscura de texto y se deja solo el
+ * círculo con la imagen, recortado en redondo para que encaje en el hueco de la puerta. */
+.dial.dial-tile{
+  background-color:transparent;background-repeat:no-repeat;background-position:center;background-size:cover;
+  border:none;border-radius:50%;box-shadow:0 0 0 2px #00000055,inset 0 0 10px #00000033;
+  text-shadow:none;
+}
+.dial.dial-tile:hover{box-shadow:0 0 0 2px #f8dd9b,0 0 10px 2px #f8dd9b88;}
+.dial-help{
+  position:absolute;left:50%;bottom:2%;transform:translateX(-50%);
+  font-size:.85em;color:#e8dcc0;background:rgba(0,0,0,.6);padding:.4em .8em;border-radius:8px;
+  white-space:nowrap;pointer-events:none;
+}
+
+/* ---------- Efectos ---------- */
+.fx{position:absolute;inset:0;z-index:6;pointer-events:none}
+.fx-pulse{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle at center,#f8dd9b66,#f8dd9b11 55%,transparent 72%);
+  animation:pulse .9s ease-out forwards;
+}
+.fx-pulse.big{animation-duration:1.3s}
+.fx-pulse.red{background:radial-gradient(circle at center,#ff6b5b55,#ff6b5b11 55%,transparent 72%);animation-duration:.6s}
+@keyframes pulse{from{opacity:1;transform:scale(.7)}to{opacity:0;transform:scale(1.35)}}
+
+/* Telón de transición: lo anima js/engine/render.js (transition). Mientras está
+   activo bloquea los clics para que no se pulse la escena que se está ocultando. */
+.curtain{position:absolute;inset:0;z-index:13;background:#05060a;opacity:0;pointer-events:none} /* por encima de la pantalla final (12) */
+.curtain.on{pointer-events:auto}
+/* Cambio de vista bajo el telón: las capas aparecen sin su propio fundido. */
+.stage.cut .layer.overlay,.stage.cut .placeholder{transition:none}
+
+/* ---------- HUD (interfaz sobre el escenario) ----------
+ * Principio general: nada de interfaz permanente sobre la mitad baja del
+ * escenario, que es donde suelen ir los hotspots pequeños. Todo lo que queda
+ * siempre visible cabe en una sola franja delgada arriba (nombre + inventario
+ * en línea + botones). Notas y aventuras son paneles que se abren bajo demanda.
+ * Los mensajes son notificaciones temporales, siempre arriba (nunca sobre el
+ * centro/abajo del escenario), y se desvanecen del todo -sin dejar una caja
+ * residual semitransparente-. */
+.hud{position:absolute;inset:0;z-index:8;pointer-events:none}
+.hud > *{pointer-events:auto}
+
+.top-bar{
+  position:absolute;left:1.2%;right:1.2%;top:1.2%;z-index:2;
+  display:flex;align-items:center;gap:.6em;
+}
+.scene-name{
+  flex:0 0 auto;max-width:8em;
+  font-size:.8em;letter-spacing:.12em;text-transform:uppercase;color:#d8cba8aa;
+  pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+.message{
+  /* El contenedor de mensajes nunca debe robar clics a lo que hay debajo (un hotspot, un
+   * dial): pointer-events:none explícito. Vive siempre arriba, nunca sobre el centro/abajo
+   * del escenario (ahí es donde están los hotspots pequeños e importantes), y se desvanece
+   * del todo -opacity:0- en vez de dejar una caja residual semitransparente. */
+  position:absolute;left:50%;top:var(--top-safe);transform:translateX(-50%);
+  width:min(72%,700px);
+  padding:.65em 1em;border-radius:12px;
+  color:white;text-align:center;font-size:.95em;line-height:1.35;
+  background:rgba(7,9,12,.85);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 8px 28px #0008;
+  transition:opacity .6s ease, visibility 0s linear .6s;
+  pointer-events:none;
+}
+.message:empty{opacity:0;visibility:hidden}
+.message.faded{opacity:0;visibility:hidden}
+/* en los primeros planos el mensaje se mantiene arriba, un poco más compacto */
+.stage.in-closeup .message{width:min(64%,640px);font-size:.9em}
+
+/* Inventario: siempre visible, en línea dentro de la misma franja superior que
+ * el nombre de la escena y los botones — nunca un panel aparte ni una franja
+ * inferior. Iconos pequeños, una sola fila, con scroll horizontal propio si no
+ * caben todos (nunca crece hacia abajo ni ocupa media pantalla). */
+.inventory{
+  flex:1 1 auto;min-width:0;height:3.4em;
+  display:flex;align-items:center;gap:.5em;
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;
+}
+.item{
+  /* Alto fijo (no 100% del contenedor, que ahora es más alto que el propio botón):
+   * deja .4em de margen arriba y abajo dentro de `.inventory` para que las insignias
+   * que sobresalen un poco del botón (como antes) no las corte el overflow-y:hidden
+   * de la fila, que hace falta para el scroll horizontal. */
+  position:relative;flex:0 0 auto;height:2.6em;aspect-ratio:1/1;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid #39424f;border-radius:.6em;
+  background:rgba(20,24,30,.88);backdrop-filter:blur(6px);color:white;padding:.2em;cursor:pointer;
+  transition:.2s;
+}
+.item:hover{background:#252d37;border-color:#4a5566}
+.item.selected{border-color:var(--accent);box-shadow:0 0 0 2px #c9a55c33,0 0 14px #c9a55c44;background:#241f16}
+.item.new{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1)}}
+.item img,.item svg{width:78%;height:78%;object-fit:contain;display:block}
+.item img.missing{display:none}
+.item svg{color:#d8b56a}
+.item span{display:none}   /* el nombre completo va en el title (tooltip); el icono debe bastar de un vistazo */
+/* Objetos combinables: "+" pequeño y discreto, asomando un poco por fuera de la
+ * esquina (como en el diseño original) — cabe sin cortarse gracias al margen que
+ * deja `.inventory` alrededor de cada botón (ver arriba). */
+.item.combinable::before{
+  content:"+";position:absolute;top:-.35em;left:-.35em;width:1.1em;height:1.1em;
+  border-radius:50%;background:var(--ok);color:#0c1a12;font-weight:700;font-size:.62em;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px #0008;
+  border:1px solid #ffffff33;line-height:1;
+}
+/* Colecciones acumulativas (p.ej. hojas de un derrotero repartidas por la casa):
+ * una sola entrada con progreso "n/total" en vez de un icono por cada una. Vuelve a
+ * asomar por fuera de la esquina del botón (como el diseño original) en vez de ir
+ * apretada dentro — con el margen nuevo alrededor de cada botón ya no se corta. */
+.item.group .count{
+  position:absolute;bottom:-.35em;right:-.35em;min-width:1.5em;height:1.2em;padding:0 .25em;
+  border-radius:1em;background:#1b2027;border:1px solid var(--accent);color:#f4e2b8;
+  font-size:.62em;font-weight:700;display:flex;align-items:center;justify-content:center;
+  line-height:1;box-shadow:0 1px 4px #0008;
+}
+.item.group.complete{border-color:var(--ok)}
+.item.group.complete .count{border-color:var(--ok);color:#dff5e6}
+.empty{
+  color:var(--muted);font-size:.78em;white-space:nowrap;
+  padding:0 .8em;display:flex;align-items:center;
+}
+
+/* Fila compacta de botones: a la derecha de esa misma franja, nunca a todo lo
+ * ancho ni pegada a la zona baja del escenario. */
+.hud-actions{
+  flex:0 0 auto;display:flex;gap:.4em;
+}
+.hud-actions button{
+  position:relative;height:2.6em;
+  display:flex;align-items:center;gap:.35em;
+  border:1px solid #39424f;color:white;background:rgba(20,24,30,.88);backdrop-filter:blur(6px);
+  border-radius:.7em;padding:0 .75em;cursor:pointer;font-size:.85em;white-space:nowrap;
+}
+.hud-actions button:hover{background:#252d37}
+.hud-actions button[aria-expanded="true"]{border-color:var(--accent);background:#241f16}
+.hud-actions button[aria-pressed="true"]{opacity:.6}
+.hud-actions .badge{
+  position:absolute;top:-.4em;right:-.4em;min-width:1.6em;height:1.6em;padding:0 .4em;
+  border-radius:1em;background:var(--accent);color:#1a1408;font-size:.7em;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.hud-actions .badge[hidden]{display:none}
+
+/* Confirmación visual al recoger un objeto: grande, centrada, temporal, y sin
+ * ningún resto al terminar (JS oculta el contenedor y limpia el src). */
+.pickup-toast{
+  position:absolute;inset:0;z-index:9;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.pickup-toast[hidden]{display:none}
+.pickup-toast img{
+  width:min(34%,220px);max-height:55%;object-fit:contain;
+  filter:drop-shadow(0 14px 36px #000c) drop-shadow(0 0 40px #f8dd9b55);
+  opacity:0;
+}
+.pickup-toast img.play{animation:pickupToast 1.8s cubic-bezier(.2,1,.3,1) forwards}
+@keyframes pickupToast{
+  0%{opacity:0;transform:scale(.7)}
+  14%{opacity:1;transform:scale(1)}
+  78%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.06)}
+}
+
+/* Panel desplegable de notas y progreso */
+.notes-panel{
+  position:absolute;right:1.2%;top:calc(1.2% + 3.2em);bottom:4%;
+  width:min(340px,42%);overflow:auto;
+  background:rgba(12,15,19,.9);backdrop-filter:blur(10px);
+  border:1px solid #3a424d;border-radius:14px;padding:1em 1.1em;
+  box-shadow:0 12px 40px #000a;
+}
+.notes-panel[hidden]{display:none}
+.notes-panel h3{font-size:.95em;margin:0 0 .6em;color:#f7f7f8}
+.notes{font-size:.9em;color:var(--muted);line-height:1.5;margin-bottom:1.2em}
+.notes p{margin:0 0 .8em}
+.progress{display:grid;gap:.5em;font-size:.85em;color:#bbc3ce}
+.progress .row{display:flex;align-items:center;gap:.6em}
+.dot{width:.65em;height:.65em;border-radius:50%;background:#525b67}
+.dot.done{background:var(--ok);box-shadow:0 0 10px #63a57866}
+
+/* Panel desplegable de aventuras (selector de fase) */
+.phases-panel{
+  position:absolute;right:1.2%;top:calc(1.2% + 3.2em);bottom:4%;
+  width:min(340px,42%);overflow:auto;
+  background:rgba(12,15,19,.9);backdrop-filter:blur(10px);
+  border:1px solid #3a424d;border-radius:14px;padding:1em 1.1em;
+  box-shadow:0 12px 40px #000a;
+}
+.phases-panel[hidden]{display:none}
+.phases-panel h3{font-size:.95em;margin:0 0 .6em;color:#f7f7f8}
+.phases-list{display:grid;gap:.6em}
+.phase-card{
+  display:block;width:100%;text-align:left;cursor:pointer;
+  background:#1b2027;border:1px solid #3a424d;border-radius:10px;padding:.7em .8em;
+  color:#e7e9ec;font-family:inherit;
+}
+.phase-card:hover{border-color:var(--accent);background:#222834}
+.phase-card.current{border-color:var(--ok);background:#1c2621;cursor:default}
+.phase-card .name{font-size:.92em;font-weight:700;margin:0 0 .2em}
+.phase-card .tagline{font-size:.8em;color:var(--muted);line-height:1.4}
+.phase-card .tag{display:inline-block;font-size:.72em;color:var(--ok);margin-top:.35em}
+.phases-note{font-size:.78em;color:var(--muted);margin:.9em 0 0}
+
+/* ---------- Final ---------- */
+/* La imagen final es la recompensa: la caja se apoya abajo, sobre un degradado que solo
+ * oscurece la franja inferior, dejando el resto de la escena despejado (mismo criterio que
+ * .message, que tampoco cubre el centro de la imagen). */
+.ending{
+  position:absolute;inset:0;z-index:12;display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:5%;
+  background:linear-gradient(to top, rgba(4,6,10,.78) 0%, rgba(4,6,10,.42) 30%, transparent 60%);
+  animation:fadein 1.2s ease;
+}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.ending[hidden]{display:none}
+.ending .box{
+  text-align:center;background:#151a20;border:1px solid #3a424d;border-radius:16px;padding:1.4em 1.7em;
+  box-shadow:0 24px 80px #000c;max-width:min(460px,88%);
+}
+.ending h2{margin:0 0 .4em;font-size:1.4em;color:var(--accent)}
+.ending p{margin:0 0 1em;color:var(--muted);font-size:.9em;line-height:1.5}
+.ending button{
+  border:1px solid #a6874a;color:white;background:#6f5930;border-radius:10px;padding:.7em 1em;cursor:pointer;
+}
+.ending button:hover{background:#806837}
+
+/* ---------- Pantallas estrechas ---------- */
+@container (max-width: 720px){
+  .hud-actions .txt{display:none}
+  .hud-actions button{padding:0 .6em}
+  .message{width:94%;top:7%}
+  .notes-panel{width:80%;right:2%}
+  .phases-panel{width:80%;right:2%}
+  .scene-name{display:none}
+  .top-bar{gap:.35em}
+}
+@media(max-width:620px){
+  body{padding:6px}
+  .stage{border-radius:10px}
+}
