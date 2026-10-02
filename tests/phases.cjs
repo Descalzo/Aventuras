@@ -31,6 +31,15 @@ module.exports=async ({command,evaluate,delay,url,snapshot,assert,fs,path,root,e
   await evaluate('TD.refresh()');assert.equal((await evaluate(snapshot)).visibility,'hidden');
   await evaluate("TD.state.say('Tras telón');TD.render.transition(()=>TD.render.update(TD.state.get()))");
   await delay(900);assert.equal((await evaluate(snapshot)).visibility,'visible');
+  // Android real: el bloque inicial era 56px menor que el alto de las unidades
+  // de viewport. Simular esa discrepancia sin emular HyperOS ni falsear CSS.
+  await evaluate("document.documentElement.style.height='calc(100% - 56px)';TD.state.say('Bloque inicial menor que viewport');TD.refresh()");
+  await delay(100);
+  const bounded=await evaluate(`(()=>{const r=q=>document.querySelector(q).getBoundingClientRect().toJSON();return {root:r('html'),body:r('body'),stage:r('.stage'),message:r('.message')}})()`);
+  assert(Math.abs(bounded.body.height-bounded.root.height)<1,'Body sigue bloque inicial');
+  assert(bounded.stage.bottom<=bounded.root.bottom+1,'Escena dentro del bloque inicial');
+  assert(bounded.message.bottom<=bounded.root.bottom+1,'Mensaje dentro del bloque inicial');
+  await evaluate("document.documentElement.style.removeProperty('height')");
   // No gastar el plazo mientras el escenario no tiene geometría válida.
   await evaluate("document.querySelector('.game').style.width='0px';TD.state.say('Layout pendiente');TD.refresh()");
   await delay(6300);

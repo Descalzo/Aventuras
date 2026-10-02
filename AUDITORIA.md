@@ -1,3 +1,7 @@
+# Auditoría anterior (conservada como historial)
+
+**Actualización:** la reproducción y corrección en el Xiaomi están documentadas en [docs/android-audit/README.md](docs/android-audit/README.md). Su diagnóstico sustituye las hipótesis pendientes de esta auditoría anterior.
+
 # Auditoría de mensajes y PWA — 2 de octubre de 2026
 
 ## Base y alcance

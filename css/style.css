@@ -26,9 +26,11 @@ body{
 }
 
 body{
-  width:100vw;
-  height:100vh;
-  height:100dvh;
+  /* En la PWA Android las unidades vh/dvh pueden conservar el alto anterior
+     a fullscreen. El bloque inicial (html al 100%) sí refleja la ventana real. */
+  width:100%;
+  height:100%;
+  container-type:size;
   min-height:0;
   display:flex;
   align-items:center;
@@ -42,8 +44,8 @@ button{
 }
 
 .game{
-  width:min(100vw, calc(100vh * 1672 / 941));
-  width:min(100vw, calc(100dvh * 1672 / 941));
+  /* Ambos límites proceden del mismo contenedor, sin unidades de viewport. */
+  width:min(100cqw, calc(100cqh * 1672 / 941));
   aspect-ratio:var(--scene-ratio);
 }
   
