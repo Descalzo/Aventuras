@@ -338,16 +338,10 @@
 (function () {
 
   function actualizarViewport() {
+    const vv = window.visualViewport;
 
-    const viewport = window.visualViewport;
-
-    const ancho = viewport
-      ? viewport.width
-      : window.innerWidth;
-
-    const alto = viewport
-      ? viewport.height
-      : window.innerHeight;
+    const ancho = vv ? vv.width : window.innerWidth;
+    const alto  = vv ? vv.height : window.innerHeight;
 
     document.documentElement.style.setProperty(
       "--app-vw",
@@ -359,20 +353,27 @@
       alto + "px"
     );
 
-    // Fuerza al navegador a recalcular el layout
+    // Obliga a recalcular el layout
     void document.documentElement.offsetHeight;
   }
 
-
-  // Primera medición
   actualizarViewport();
 
-
-  // Cuando Android/Brave cambie realmente el viewport
   window.addEventListener("resize", actualizarViewport);
   window.addEventListener("orientationchange", actualizarViewport);
   window.addEventListener("pageshow", actualizarViewport);
+  window.addEventListener("focus", actualizarViewport);
 
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      actualizarViewport();
+    }
+  });
+
+  document.addEventListener(
+    "fullscreenchange",
+    actualizarViewport
+  );
 
   if (window.visualViewport) {
     window.visualViewport.addEventListener(
@@ -381,19 +382,19 @@
     );
   }
 
-
   /*
-   * Brave/HyperOS puede tardar unas décimas en terminar
-   * de establecer fullscreen/landscape.
-   * Lo comprobamos varias veces después del arranque.
+   * Brave/HyperOS puede tardar en terminar de ajustar
+   * fullscreen + landscape.
    */
   requestAnimationFrame(() => {
     requestAnimationFrame(actualizarViewport);
   });
 
-  setTimeout(actualizarViewport, 250);
+  setTimeout(actualizarViewport, 100);
+  setTimeout(actualizarViewport, 300);
   setTimeout(actualizarViewport, 700);
   setTimeout(actualizarViewport, 1500);
+  setTimeout(actualizarViewport, 2500);
 
 })();
 </script>
