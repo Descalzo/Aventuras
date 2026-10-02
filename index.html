@@ -398,6 +398,69 @@
 
 })();
 </script>
+
+
+<script>
+(function () {
+
+  const message = document.querySelector('[data-slot="message"]');
+
+  if (!message) return;
+
+  function forceMessageRepaint() {
+
+    /*
+     * Fuerza a Chromium/Brave a recalcular y repintar
+     * la capa del mensaje.
+     */
+    message.style.transform = "translate3d(-50%, 0, 0.01px)";
+
+    void message.offsetHeight;
+
+    requestAnimationFrame(() => {
+      message.style.transform = "translate3d(-50%, 0, 0)";
+    });
+  }
+
+
+  /*
+   * Cada vez que el motor:
+   * - escribe un mensaje
+   * - cambia la clase faded
+   * - borra un mensaje
+   *
+   * obligamos a repintarlo.
+   */
+  const observer = new MutationObserver(() => {
+    forceMessageRepaint();
+  });
+
+  observer.observe(message, {
+    childList:true,
+    characterData:true,
+    subtree:true,
+    attributes:true,
+    attributeFilter:["class"]
+  });
+
+
+  /*
+   * También repintamos al recuperar la PWA,
+   * cambiar orientación o cambiar viewport.
+   */
+  window.addEventListener("resize", forceMessageRepaint);
+  window.addEventListener("orientationchange", forceMessageRepaint);
+  window.addEventListener("pageshow", forceMessageRepaint);
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      forceMessageRepaint();
+    }
+  });
+
+})();
+</script>
+
   
 <script>
 if ("serviceWorker" in navigator) {
