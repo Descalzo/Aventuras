@@ -305,12 +305,22 @@ button{
   pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 
+/* ---------- Mensajes ---------- */
+
 .message{
   position:absolute;
+  z-index:20;
+
   left:50%;
   bottom:2.5%;
   top:auto;
-  transform:translateX(-50%);
+
+  /*
+   * translate3d obliga a Chromium/Brave a crear una capa de composición
+   * propia para el mensaje y evita fallos de repintado en la PWA fullscreen.
+   */
+  transform:translate3d(-50%, 0, 0);
+  -webkit-transform:translate3d(-50%, 0, 0);
 
   width:min(72%,700px);
   padding:.65em 1em;
@@ -321,30 +331,46 @@ button{
   font-size:.95em;
   line-height:1.35;
 
-  background:rgba(7,9,12,.85);
-  backdrop-filter:blur(10px);
+  background:rgba(7,9,12,.92);
+
+  /*
+   * Lo quitamos de momento.
+   * backdrop-filter puede provocar problemas de composición/repaint
+   * en Android/PWA fullscreen.
+   */
+  /* backdrop-filter:blur(10px); */
+
   border:1px solid rgba(255,255,255,.09);
   box-shadow:0 8px 28px #0008;
 
-  transition:opacity .6s ease, visibility 0s linear .6s;
+  opacity:1;
+  visibility:visible;
+
+  /*
+   * Solo animamos opacity.
+   * No retrasamos visibility.
+   */
+  transition:opacity .35s ease;
+
   pointer-events:none;
+
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+
+  will-change:opacity, transform;
 }
 
-.message:empty{
-  opacity:0;
-  visibility:hidden;
-}
-
+.message:empty,
 .message.faded{
   opacity:0;
   visibility:hidden;
 }
 
-/* En primeros planos se mantiene abajo y un poco más compacto */
 .stage.in-closeup .message{
   width:min(64%,640px);
   font-size:.9em;
 }
+  
 /* Inventario: siempre visible, en línea dentro de la misma franja superior que
  * el nombre de la escena y los botones — nunca un panel aparte ni una franja
  * inferior. Iconos pequeños, una sola fila, con scroll horizontal propio si no
@@ -511,7 +537,13 @@ button{
 @container (max-width: 720px){
   .hud-actions .txt{display:none}
   .hud-actions button{padding:0 .6em}
-  .message{  width:94%;  top:auto;  bottom:2.5%;}
+
+  .message{
+    width:94%;
+    top:auto;
+    bottom:2.5%;
+  }
+
   .notes-panel{width:80%;right:2%}
   .phases-panel{width:80%;right:2%}
   .scene-name{display:none}
