@@ -27,6 +27,7 @@ body{
 
 body{
   width:100vw;
+  height:100vh;
   height:100dvh;
   min-height:0;
   display:flex;
@@ -41,6 +42,7 @@ button{
 }
 
 .game{
+  width:min(100vw, calc(100vh * 1672 / 941));
   width:min(100vw, calc(100dvh * 1672 / 941));
   aspect-ratio:var(--scene-ratio);
 }
@@ -302,61 +304,17 @@ button{
 .message{
   position:absolute;
   z-index:20;
-
-  left:50%;
-  bottom:2.5%;
-  top:auto;
-
-  /*
-   * translate3d obliga a Chromium/Brave a crear una capa de composición
-   * propia para el mensaje y evita fallos de repintado en la PWA fullscreen.
-   */
-  transform:translate3d(-50%, 0, 0);
-  -webkit-transform:translate3d(-50%, 0, 0);
-
+  left:0;right:0;margin-inline:auto;
+  bottom:max(2.5%, env(safe-area-inset-bottom));
   width:min(72%,700px);
-  padding:.65em 1em;
-  border-radius:12px;
-
-  color:white;
-  text-align:center;
-  font-size:.95em;
-  line-height:1.35;
-
+  padding:.65em 1em;border-radius:12px;
+  color:white;text-align:center;font-size:.95em;line-height:1.35;
   background:rgba(7,9,12,.92);
-
-  /*
-   * Lo quitamos de momento.
-   * backdrop-filter puede provocar problemas de composición/repaint
-   * en Android/PWA fullscreen.
-   */
-  /* backdrop-filter:blur(10px); */
-
   border:1px solid rgba(255,255,255,.09);
   box-shadow:0 8px 28px #0008;
-
-  opacity:1;
-  visibility:visible;
-
-  /*
-   * Solo animamos opacity.
-   * No retrasamos visibility.
-   */
-  transition:opacity .35s ease;
-
   pointer-events:none;
-
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-
-  will-change:opacity, transform;
 }
-
-.message:empty,
-.message.faded{
-  opacity:0;
-  visibility:hidden;
-}
+.message:empty,.message.faded{visibility:hidden}
 
 .stage.in-closeup .message{
   width:min(64%,640px);

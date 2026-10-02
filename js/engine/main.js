@@ -19,6 +19,9 @@ const SOUND_FOR = { pickup:"pickup", use:"use", dial:"dial", solve:"solve", unlo
 
 
 async function enterGameMode() {
+  // El manifest ya establece fullscreen y landscape en la app instalada.
+  if (matchMedia("(display-mode: fullscreen)").matches ||
+      matchMedia("(display-mode: standalone)").matches) return;
   try {
     if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
       await document.documentElement.requestFullscreen();

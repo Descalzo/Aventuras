@@ -20,6 +20,9 @@ const closeupEls = {};   // "scene/cu" -> { root, img, layers:{id:{img,ph}}, hot
 const missing = new Set(); // "scene/overlay" o "scene/cu/layer" cuya imagen no existe
 let last = { scene:null, view:null, items:[], message:null };
 let messageTimer = null;
+let messageFrame = null;
+let messageRevision = -1;
+let messagePending = false;
 
 function applyRect(el, r){
   el.style.left=r.left+"%"; el.style.top=r.top+"%";
@@ -69,6 +72,15 @@ function mount(handlers){
       els.progress.appendChild(row);
     });
   }
+  // Un único ciclo del mensaje: layout válido, página visible y telón abierto.
+  new ResizeObserver(()=>{ if(messagePending) scheduleMessage(); }).observe(els.stage);
+  document.addEventListener("visibilitychange",()=>{
+    if(document.hidden){
+      clearTimeout(messageTimer);
+      if(els.message.textContent && !els.message.classList.contains("faded")) messagePending=true;
+    }else if(messagePending) scheduleMessage();
+  });
+  document.addEventListener("fullscreenchange",()=>{ if(messagePending) scheduleMessage(); });
   if(els.back) els.back.addEventListener("click",()=>H.onBack());
 }
 
@@ -325,16 +337,35 @@ function renderProgress(state){
   });
 }
 
-/* Mensaje: se muestra y se atenúa solo tras unos segundos (vuelve al pasar el ratón). */
+/* El texto no identifica una notificación: una acción puede repetirlo.
+ * No rearmar por render incidental (p.ej. carga de imagen). El plazo empieza
+ * después del telón y de un frame con geometría válida, nunca con la app oculta. */
+function scheduleMessage(){
+  clearTimeout(messageTimer);
+  if(messageFrame!==null) cancelAnimationFrame(messageFrame);
+  messageFrame=requestAnimationFrame(()=>{
+    messageFrame=requestAnimationFrame(()=>{
+      messageFrame=null;
+      if(!messagePending || document.hidden || curtainActive) return;
+      const stage=els.stage.getBoundingClientRect();
+      const message=els.message.getBoundingClientRect();
+      if(stage.width<=0 || stage.height<=0 || message.width<=0 || message.height<=0) return;
+      messagePending=false;
+      messageTimer=setTimeout(()=>els.message.classList.add("faded"),6000);
+    });
+  });
+}
 function renderMessage(state){
   if(!els.message) return;
-  els.message.textContent = state.message;
-  if(state.message!==last.message){
-    last.message = state.message;
-    els.message.classList.remove("faded");
-    if(messageTimer) clearTimeout(messageTimer);
-    messageTimer = setTimeout(()=>els.message.classList.add("faded"), 6000);
-  }
+  const revision=TD.state.messageRevision;
+  if(state.message===last.message && revision===messageRevision) return;
+  last.message=state.message;
+  messageRevision=revision;
+  clearTimeout(messageTimer);
+  els.message.textContent=state.message;
+  els.message.classList.remove("faded");
+  messagePending=!!state.message;
+  afterCurtain(()=>{ if(messagePending) scheduleMessage(); });
 }
 
 /* ---------- efectos transitorios ---------- */

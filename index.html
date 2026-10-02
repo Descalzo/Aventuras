@@ -2,17 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>Aventuras</title>
 
-<!--
-  v=12 fuerza al navegador/PWA a descargar la versión actual del CSS
-  en lugar de reutilizar una copia antigua.
--->
-<link rel="stylesheet" href="css/style.css?v=12">
+
+<link rel="stylesheet" href="css/style.css">
 
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
@@ -227,278 +225,107 @@
 <!-- MOTOR BASE                                                -->
 <!-- ========================================================= -->
 
-<script src="js/data.js?v=12"></script>
+<script src="js/data.js"></script>
 
-<script src="js/engine/state.js?v=12"></script>
-<script src="js/engine/audio.js?v=12"></script>
-<script src="js/engine/chronicle.js?v=12"></script>
+<script src="js/engine/state.js"></script>
+<script src="js/engine/audio.js"></script>
+<script src="js/engine/chronicle.js"></script>
 
 
 <!-- ========================================================= -->
 <!-- FASE 1                                                    -->
 <!-- ========================================================= -->
 
-<script src="js/scenes/study.js?v=12"></script>
-<script src="js/scenes/hall.js?v=12"></script>
-<script src="js/scenes/library.js?v=12"></script>
-<script src="js/scenes/workshop.js?v=12"></script>
+<script src="js/scenes/study.js"></script>
+<script src="js/scenes/hall.js"></script>
+<script src="js/scenes/library.js"></script>
+<script src="js/scenes/workshop.js"></script>
 
-<script src="js/phases/clockmaker.js?v=12"></script>
+<script src="js/phases/clockmaker.js"></script>
 
 
 <!-- ========================================================= -->
 <!-- FASE 2: LA CASA DE LA SIRENA                              -->
 <!-- ========================================================= -->
 
-<script src="js/scenes/sevilla/patio.js?v=12"></script>
-<script src="js/scenes/sevilla/archivo.js?v=12"></script>
-<script src="js/scenes/sevilla/taller.js?v=12"></script>
-<script src="js/scenes/sevilla/azotea.js?v=12"></script>
+<script src="js/scenes/sevilla/patio.js"></script>
+<script src="js/scenes/sevilla/archivo.js"></script>
+<script src="js/scenes/sevilla/taller.js"></script>
+<script src="js/scenes/sevilla/azotea.js"></script>
 
-<script src="js/phases/sevilla.js?v=12"></script>
+<script src="js/phases/sevilla.js"></script>
 
 
 <!-- ========================================================= -->
 <!-- FASE 3: EL DERROTERO PERDIDO                              -->
 <!-- ========================================================= -->
 
-<script src="js/scenes/derrotero/zaguan.js?v=12"></script>
-<script src="js/scenes/derrotero/patio.js?v=12"></script>
-<script src="js/scenes/derrotero/salon.js?v=12"></script>
-<script src="js/scenes/derrotero/despacho.js?v=12"></script>
-<script src="js/scenes/derrotero/biblioteca.js?v=12"></script>
-<script src="js/scenes/derrotero/taller.js?v=12"></script>
-<script src="js/scenes/derrotero/jardin.js?v=12"></script>
-<script src="js/scenes/derrotero/azotea.js?v=12"></script>
+<script src="js/scenes/derrotero/zaguan.js"></script>
+<script src="js/scenes/derrotero/patio.js"></script>
+<script src="js/scenes/derrotero/salon.js"></script>
+<script src="js/scenes/derrotero/despacho.js"></script>
+<script src="js/scenes/derrotero/biblioteca.js"></script>
+<script src="js/scenes/derrotero/taller.js"></script>
+<script src="js/scenes/derrotero/jardin.js"></script>
+<script src="js/scenes/derrotero/azotea.js"></script>
 
-<script src="js/phases/derrotero.js?v=12"></script>
+<script src="js/phases/derrotero.js"></script>
 
 
 <!-- ========================================================= -->
 <!-- FASE 4: EL FARO DE PUNTA CORVO                            -->
 <!-- ========================================================= -->
 
-<script src="js/scenes/faro/vivienda.js?v=12"></script>
-<script src="js/scenes/faro/taller.js?v=12"></script>
-<script src="js/scenes/faro/guardia.js?v=12"></script>
-<script src="js/scenes/faro/despensa.js?v=12"></script>
-<script src="js/scenes/faro/cueva.js?v=12"></script>
-<script src="js/scenes/faro/linterna.js?v=12"></script>
+<script src="js/scenes/faro/vivienda.js"></script>
+<script src="js/scenes/faro/taller.js"></script>
+<script src="js/scenes/faro/guardia.js"></script>
+<script src="js/scenes/faro/despensa.js"></script>
+<script src="js/scenes/faro/cueva.js"></script>
+<script src="js/scenes/faro/linterna.js"></script>
 
-<script src="js/phases/faro.js?v=12"></script>
+<script src="js/phases/faro.js"></script>
 
 
 <!-- ========================================================= -->
 <!-- FASE 5: EL ARCHIVO NEGADO                                 -->
 <!-- ========================================================= -->
 
-<script src="js/scenes/negado/entrada.js?v=12"></script>
-<script src="js/scenes/negado/mapas.js?v=12"></script>
-<script src="js/scenes/negado/despacho.js?v=12"></script>
-<script src="js/scenes/negado/ficheros.js?v=12"></script>
-<script src="js/scenes/negado/deposito.js?v=12"></script>
-<script src="js/scenes/negado/camara.js?v=12"></script>
+<script src="js/scenes/negado/entrada.js"></script>
+<script src="js/scenes/negado/mapas.js"></script>
+<script src="js/scenes/negado/despacho.js"></script>
+<script src="js/scenes/negado/ficheros.js"></script>
+<script src="js/scenes/negado/deposito.js"></script>
+<script src="js/scenes/negado/camara.js"></script>
 
-<script src="js/phases/negado.js?v=12"></script>
+<script src="js/phases/negado.js"></script>
 
 
 <!-- ========================================================= -->
 <!-- FASE 6: EL RUMBO DE LA CASA                               -->
 <!-- ========================================================= -->
 
-<script src="js/scenes/piloto/zaguan.js?v=12"></script>
-<script src="js/scenes/piloto/patio.js?v=12"></script>
-<script src="js/scenes/piloto/salon.js?v=12"></script>
-<script src="js/scenes/piloto/despacho.js?v=12"></script>
-<script src="js/scenes/piloto/biblioteca.js?v=12"></script>
-<script src="js/scenes/piloto/taller.js?v=12"></script>
-<script src="js/scenes/piloto/jardin.js?v=12"></script>
-<script src="js/scenes/piloto/archivo.js?v=12"></script>
-<script src="js/scenes/piloto/taller_azulejos.js?v=12"></script>
-<script src="js/scenes/piloto/azotea.js?v=12"></script>
-<script src="js/scenes/piloto/azotea_campanas.js?v=12"></script>
+<script src="js/scenes/piloto/zaguan.js"></script>
+<script src="js/scenes/piloto/patio.js"></script>
+<script src="js/scenes/piloto/salon.js"></script>
+<script src="js/scenes/piloto/despacho.js"></script>
+<script src="js/scenes/piloto/biblioteca.js"></script>
+<script src="js/scenes/piloto/taller.js"></script>
+<script src="js/scenes/piloto/jardin.js"></script>
+<script src="js/scenes/piloto/archivo.js"></script>
+<script src="js/scenes/piloto/taller_azulejos.js"></script>
+<script src="js/scenes/piloto/azotea.js"></script>
+<script src="js/scenes/piloto/azotea_campanas.js"></script>
 
-<script src="js/phases/piloto.js?v=12"></script>
+<script src="js/phases/piloto.js"></script>
 
 
 <!-- ========================================================= -->
 <!-- MOTOR FINAL                                               -->
 <!-- ========================================================= -->
 
-<script src="js/engine/actions.js?v=12"></script>
-<script src="js/engine/render.js?v=12"></script>
-<script src="js/engine/main.js?v=12"></script>
-
-
-<!-- ========================================================= -->
-<!-- SERVICE WORKER                                            -->
-<!-- ========================================================= -->
-
-<script>
-(function () {
-
-  function actualizarViewport() {
-    const vv = window.visualViewport;
-
-    const ancho = vv ? vv.width : window.innerWidth;
-    const alto  = vv ? vv.height : window.innerHeight;
-
-    document.documentElement.style.setProperty(
-      "--app-vw",
-      ancho + "px"
-    );
-
-    document.documentElement.style.setProperty(
-      "--app-vh",
-      alto + "px"
-    );
-
-    // Obliga a recalcular el layout
-    void document.documentElement.offsetHeight;
-  }
-
-  actualizarViewport();
-
-  window.addEventListener("resize", actualizarViewport);
-  window.addEventListener("orientationchange", actualizarViewport);
-  window.addEventListener("pageshow", actualizarViewport);
-  window.addEventListener("focus", actualizarViewport);
-
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      actualizarViewport();
-    }
-  });
-
-  document.addEventListener(
-    "fullscreenchange",
-    actualizarViewport
-  );
-
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener(
-      "resize",
-      actualizarViewport
-    );
-  }
-
-  /*
-   * Brave/HyperOS puede tardar en terminar de ajustar
-   * fullscreen + landscape.
-   */
-  requestAnimationFrame(() => {
-    requestAnimationFrame(actualizarViewport);
-  });
-
-  setTimeout(actualizarViewport, 100);
-  setTimeout(actualizarViewport, 300);
-  setTimeout(actualizarViewport, 700);
-  setTimeout(actualizarViewport, 1500);
-  setTimeout(actualizarViewport, 2500);
-
-})();
-</script>
-
-
-<script>
-(function () {
-
-  const message = document.querySelector('[data-slot="message"]');
-
-  if (!message) return;
-
-  function forceMessageRepaint() {
-
-    /*
-     * Fuerza a Chromium/Brave a recalcular y repintar
-     * la capa del mensaje.
-     */
-    message.style.transform = "translate3d(-50%, 0, 0.01px)";
-
-    void message.offsetHeight;
-
-    requestAnimationFrame(() => {
-      message.style.transform = "translate3d(-50%, 0, 0)";
-    });
-  }
-
-
-  /*
-   * Cada vez que el motor:
-   * - escribe un mensaje
-   * - cambia la clase faded
-   * - borra un mensaje
-   *
-   * obligamos a repintarlo.
-   */
-  const observer = new MutationObserver(() => {
-    forceMessageRepaint();
-  });
-
-  observer.observe(message, {
-    childList:true,
-    characterData:true,
-    subtree:true,
-    attributes:true,
-    attributeFilter:["class"]
-  });
-
-
-  /*
-   * También repintamos al recuperar la PWA,
-   * cambiar orientación o cambiar viewport.
-   */
-  window.addEventListener("resize", forceMessageRepaint);
-  window.addEventListener("orientationchange", forceMessageRepaint);
-  window.addEventListener("pageshow", forceMessageRepaint);
-
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      forceMessageRepaint();
-    }
-  });
-
-})();
-</script>
-
-  
-<script>
-if ("serviceWorker" in navigator) {
-
-  window.addEventListener("load", () => {
-
-    navigator.serviceWorker.register("./sw.js?v=12", {
-      updateViaCache: "none"
-    })
-
-    .then(reg => {
-
-      console.log(
-        "Service Worker registrado:",
-        reg.scope
-      );
-
-      /*
-       * Fuerza una comprobación de actualización.
-       * No borra datos ni progreso del juego.
-       */
-      reg.update();
-
-    })
-
-    .catch(err => {
-
-      console.error(
-        "Error Service Worker:",
-        err
-      );
-
-    });
-
-  });
-
-}
-</script>
-
+<script src="js/engine/actions.js"></script>
+<script src="js/engine/render.js"></script>
+<script src="js/engine/main.js"></script>
+<script src="js/pwa.js"></script>
 </body>
 </html>

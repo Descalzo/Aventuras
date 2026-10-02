@@ -39,6 +39,7 @@ function initial(){
 }
 
 let current = initial();
+let messageRevision = 0; // transitorio: repetir un texto también es un mensaje nuevo
 let events = [];          // cola transitoria de eventos (no se guarda)
 let context = null;       // contexto de la acción en curso (p. ej. rect del hotspot)
 
@@ -110,6 +111,7 @@ function load(){
 }
 function reset(){
   current = initial();
+  messageRevision++;
   try{ localStorage.removeItem(saveKey()); }catch(e){}
   return current;
 }
@@ -162,7 +164,7 @@ function useSelectedGroup(groupId){
   emit("use",{item:groupSelectId(groupId)});
   return true;
 }
-function say(text){ current.message = text; }
+function say(text){ current.message = text; messageRevision++; }
 function go(sceneId){
   if(!TD.scenes[sceneId]) return false;
   current.scene = sceneId; current.view = "room"; current.selected = null;
@@ -184,6 +186,7 @@ const api = { SAVE_VERSION, initial, sanitize, get, save, load, reset,
          flag, dial, has, addItem, removeItem, useSelected, say, go,
          groupSelectId, selectedGroup, toggleGroupSelected, useSelectedGroup,
          emit, drain, setContext };
+Object.defineProperty(api, "messageRevision", { get: () => messageRevision });
 Object.defineProperty(api, "SAVE_KEY",    { get: saveKey });
 Object.defineProperty(api, "START_SCENE", { get: startScene });
 return api;

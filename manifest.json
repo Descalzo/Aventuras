@@ -1,6 +1,7 @@
 {
   "name": "Aventuras",
   "short_name": "Aventuras",
+  "id": "/Aventuras/index.html",
   "start_url": "/Aventuras/index.html",
   "scope": "/Aventuras/",
   "display": "fullscreen",
@@ -14,7 +15,7 @@
       "type": "image/png"
     },
     {
-      "src": "/Aventuras/icons/icon-192.png",
+      "src": "/Aventuras/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
