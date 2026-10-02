@@ -3,24 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+
 <title>Aventuras</title>
-<link rel="stylesheet" href="css/style.css">
+
+<!--
+  v=12 fuerza al navegador/PWA a descargar la versión actual del CSS
+  en lugar de reutilizar una copia antigua.
+-->
+<link rel="stylesheet" href="css/style.css?v=12">
+
 <link rel="manifest" href="manifest.json">
+
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body>
+
 <!--
-  Los bloques de interfaz se identifican con data-slot. El render (js/engine/render.js)
-  los busca por ese atributo. Los escenarios y primeros planos se construyen
-  dinámicamente dentro de [data-slot=room] y [data-slot=closeup] a partir de js/scenes/*.js.
+  Los bloques de interfaz se identifican con data-slot.
+  El render (js/engine/render.js) los busca por ese atributo.
+
+  Los escenarios y primeros planos se construyen dinámicamente dentro de
+  [data-slot=room] y [data-slot=closeup] a partir de js/scenes/*.js.
 -->
+
 <div class="game">
   <main class="stage" id="stage" data-slot="stage">
 
-    <!-- VISTA: escenarios (base + overlays + hotspots), uno por escenario registrado -->
+    <!-- VISTA: escenarios -->
     <div class="view" data-slot="room"></div>
 
     <!-- VISTA: primeros planos -->
@@ -28,130 +41,336 @@
       <button type="button" class="back" data-slot="back">← Volver</button>
     </div>
 
-    <!-- Efectos transitorios: pulsos y fundido entre vistas -->
+    <!-- Efectos transitorios -->
     <div class="fx" data-slot="fx"></div>
     <div class="curtain" data-slot="curtain"></div>
 
-    <!-- HUD: interfaz superpuesta al escenario. Sin franja fija de fondo: una sola
-         franja delgada arriba (nombre + inventario en línea + botones), y paneles de
-         notas/aventuras que se abren bajo demanda. El resto del escenario -sobre
-         todo toda la parte inferior- queda siempre libre para los hotspots. -->
+    <!-- HUD -->
     <div class="hud">
+
       <div class="top-bar">
-        <div class="scene-name" data-slot="scene-name"></div>
-        <div class="inventory" data-slot="inventory" aria-label="Inventario"></div>
+
+        <div
+          class="scene-name"
+          data-slot="scene-name">
+        </div>
+
+        <div
+          class="inventory"
+          data-slot="inventory"
+          aria-label="Inventario">
+        </div>
+
         <div class="hud-actions">
-          <button type="button" data-action="notes" aria-expanded="false" title="Notas y progreso">
-            <span class="ico">📖</span><span class="txt">Notas</span><span class="badge" data-slot="notes-count" hidden></span>
+
+          <button
+            type="button"
+            data-action="notes"
+            aria-expanded="false"
+            title="Notas y progreso">
+
+            <span class="ico">📖</span>
+            <span class="txt">Notas</span>
+            <span
+              class="badge"
+              data-slot="notes-count"
+              hidden>
+            </span>
+
           </button>
-          <button type="button" data-action="phases" aria-expanded="false" title="Elegir aventura">
-            <span class="ico">🗺️</span><span class="txt">Aventuras</span>
+
+
+          <button
+            type="button"
+            data-action="phases"
+            aria-expanded="false"
+            title="Elegir aventura">
+
+            <span class="ico">🗺️</span>
+            <span class="txt">Aventuras</span>
+
           </button>
-          <button type="button" data-action="hint" title="Pista"><span class="ico">💡</span><span class="txt">Pista</span></button>
-          <button type="button" data-action="mute" aria-pressed="false" title="Silenciar"><span class="ico">🔊</span></button>
-          <button type="button" data-action="reset" title="Reiniciar"><span class="ico">↻</span><span class="txt">Reiniciar</span></button>
+
+
+          <button
+            type="button"
+            data-action="hint"
+            title="Pista">
+
+            <span class="ico">💡</span>
+            <span class="txt">Pista</span>
+
+          </button>
+
+
+          <button
+            type="button"
+            data-action="mute"
+            aria-pressed="false"
+            title="Silenciar">
+
+            <span class="ico">🔊</span>
+
+          </button>
+
+
+          <button
+            type="button"
+            data-action="reset"
+            title="Reiniciar">
+
+            <span class="ico">↻</span>
+            <span class="txt">Reiniciar</span>
+
+          </button>
+
         </div>
       </div>
 
-      <div class="message" data-slot="message" aria-live="polite"></div>
 
-      <!-- Confirmación visual al recoger un objeto: aparece en el centro, breve, y
-           desaparece del todo (sin overlay residual) — ver TD.render.effects(). -->
-      <div class="pickup-toast" data-slot="pickup-toast" hidden aria-hidden="true">
-        <img data-slot="pickup-toast-img" alt="">
+      <!-- Mensajes del juego -->
+      <div
+        class="message"
+        data-slot="message"
+        aria-live="polite">
       </div>
 
-      <aside class="notes-panel" data-slot="notes-panel" hidden>
+
+      <!-- Confirmación visual al recoger objetos -->
+      <div
+        class="pickup-toast"
+        data-slot="pickup-toast"
+        hidden
+        aria-hidden="true">
+
+        <img
+          data-slot="pickup-toast-img"
+          alt="">
+
+      </div>
+
+
+      <!-- Notas -->
+      <aside
+        class="notes-panel"
+        data-slot="notes-panel"
+        hidden>
+
         <h3>Notas</h3>
-        <div class="notes" data-slot="notes"></div>
+
+        <div
+          class="notes"
+          data-slot="notes">
+        </div>
+
         <h3>Progreso</h3>
-        <div class="progress" data-slot="progress"></div>
+
+        <div
+          class="progress"
+          data-slot="progress">
+        </div>
+
       </aside>
 
-      <aside class="phases-panel" data-slot="phases-panel" hidden>
+
+      <!-- Selector de aventuras -->
+      <aside
+        class="phases-panel"
+        data-slot="phases-panel"
+        hidden>
+
         <h3>Aventuras</h3>
-        <div class="phases-list" data-slot="phases-list"></div>
-        <p class="phases-note">Cada aventura guarda su propio progreso por separado.</p>
+
+        <div
+          class="phases-list"
+          data-slot="phases-list">
+        </div>
+
+        <p class="phases-note">
+          Cada aventura guarda su propio progreso por separado.
+        </p>
+
       </aside>
+
     </div>
 
-    <div class="ending" data-slot="ending" hidden>
+
+    <!-- Final de la aventura -->
+    <div
+      class="ending"
+      data-slot="ending"
+      hidden>
+
       <div class="box">
-        <h2 data-slot="ending-title">Has escapado</h2>
+
+        <h2 data-slot="ending-title">
+          Has escapado
+        </h2>
+
         <p data-slot="ending-text"></p>
-        <button type="button" data-action="reset">Jugar de nuevo</button>
+
+        <button
+          type="button"
+          data-action="reset">
+          Jugar de nuevo
+        </button>
+
       </div>
+
     </div>
+
   </main>
 </div>
 
-<script src="js/data.js"></script>
-<script src="js/engine/state.js"></script>
-<script src="js/engine/audio.js"></script>
-<script src="js/engine/chronicle.js"></script>
-<!-- escenarios: datos + acciones específicas (necesitan TD.state) -->
-<script src="js/scenes/study.js"></script>
-<script src="js/scenes/hall.js"></script>
-<script src="js/scenes/library.js"></script>
-<script src="js/scenes/workshop.js"></script>
-<!-- fases: datos de cada aventura (objetos, notas, pistas, final) -->
-<script src="js/phases/clockmaker.js"></script>
-<!-- fase 2: La Casa de la Sirena (Sevilla) -->
-<script src="js/scenes/sevilla/patio.js"></script>
-<script src="js/scenes/sevilla/archivo.js"></script>
-<script src="js/scenes/sevilla/taller.js"></script>
-<script src="js/scenes/sevilla/azotea.js"></script>
-<script src="js/phases/sevilla.js"></script>
-<!-- fase 3: El Derrotero Perdido (Palacio de Valderas, Sevilla) -->
-<script src="js/scenes/derrotero/zaguan.js"></script>
-<script src="js/scenes/derrotero/patio.js"></script>
-<script src="js/scenes/derrotero/salon.js"></script>
-<script src="js/scenes/derrotero/despacho.js"></script>
-<script src="js/scenes/derrotero/biblioteca.js"></script>
-<script src="js/scenes/derrotero/taller.js"></script>
-<script src="js/scenes/derrotero/jardin.js"></script>
-<script src="js/scenes/derrotero/azotea.js"></script>
-<script src="js/phases/derrotero.js"></script>
-<!-- fase 4: El Faro de Punta Corvo -->
-<script src="js/scenes/faro/vivienda.js"></script>
-<script src="js/scenes/faro/taller.js"></script>
-<script src="js/scenes/faro/guardia.js"></script>
-<script src="js/scenes/faro/despensa.js"></script>
-<script src="js/scenes/faro/cueva.js"></script>
-<script src="js/scenes/faro/linterna.js"></script>
-<script src="js/phases/faro.js"></script>
-<!-- fase 5: El Archivo Negado -->
-<script src="js/scenes/negado/entrada.js"></script>
-<script src="js/scenes/negado/mapas.js"></script>
-<script src="js/scenes/negado/despacho.js"></script>
-<script src="js/scenes/negado/ficheros.js"></script>
-<script src="js/scenes/negado/deposito.js"></script>
-<script src="js/scenes/negado/camara.js"></script>
-<script src="js/phases/negado.js"></script>
-<!-- fase 6: El Rumbo de la Casa (fusión de Derrotero + Casa de la Sirena) -->
-<script src="js/scenes/piloto/zaguan.js"></script>
-<script src="js/scenes/piloto/patio.js"></script>
-<script src="js/scenes/piloto/salon.js"></script>
-<script src="js/scenes/piloto/despacho.js"></script>
-<script src="js/scenes/piloto/biblioteca.js"></script>
-<script src="js/scenes/piloto/taller.js"></script>
-<script src="js/scenes/piloto/jardin.js"></script>
-<script src="js/scenes/piloto/archivo.js"></script>
-<script src="js/scenes/piloto/taller_azulejos.js"></script>
-<script src="js/scenes/piloto/azotea.js"></script>
-<script src="js/scenes/piloto/azotea_campanas.js"></script>
-<script src="js/phases/piloto.js"></script>
-<script src="js/engine/actions.js"></script>
-<script src="js/engine/render.js"></script>
-<script src="js/engine/main.js"></script>
+
+<!-- ========================================================= -->
+<!-- MOTOR BASE                                                -->
+<!-- ========================================================= -->
+
+<script src="js/data.js?v=12"></script>
+
+<script src="js/engine/state.js?v=12"></script>
+<script src="js/engine/audio.js?v=12"></script>
+<script src="js/engine/chronicle.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- FASE 1                                                    -->
+<!-- ========================================================= -->
+
+<script src="js/scenes/study.js?v=12"></script>
+<script src="js/scenes/hall.js?v=12"></script>
+<script src="js/scenes/library.js?v=12"></script>
+<script src="js/scenes/workshop.js?v=12"></script>
+
+<script src="js/phases/clockmaker.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- FASE 2: LA CASA DE LA SIRENA                              -->
+<!-- ========================================================= -->
+
+<script src="js/scenes/sevilla/patio.js?v=12"></script>
+<script src="js/scenes/sevilla/archivo.js?v=12"></script>
+<script src="js/scenes/sevilla/taller.js?v=12"></script>
+<script src="js/scenes/sevilla/azotea.js?v=12"></script>
+
+<script src="js/phases/sevilla.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- FASE 3: EL DERROTERO PERDIDO                              -->
+<!-- ========================================================= -->
+
+<script src="js/scenes/derrotero/zaguan.js?v=12"></script>
+<script src="js/scenes/derrotero/patio.js?v=12"></script>
+<script src="js/scenes/derrotero/salon.js?v=12"></script>
+<script src="js/scenes/derrotero/despacho.js?v=12"></script>
+<script src="js/scenes/derrotero/biblioteca.js?v=12"></script>
+<script src="js/scenes/derrotero/taller.js?v=12"></script>
+<script src="js/scenes/derrotero/jardin.js?v=12"></script>
+<script src="js/scenes/derrotero/azotea.js?v=12"></script>
+
+<script src="js/phases/derrotero.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- FASE 4: EL FARO DE PUNTA CORVO                            -->
+<!-- ========================================================= -->
+
+<script src="js/scenes/faro/vivienda.js?v=12"></script>
+<script src="js/scenes/faro/taller.js?v=12"></script>
+<script src="js/scenes/faro/guardia.js?v=12"></script>
+<script src="js/scenes/faro/despensa.js?v=12"></script>
+<script src="js/scenes/faro/cueva.js?v=12"></script>
+<script src="js/scenes/faro/linterna.js?v=12"></script>
+
+<script src="js/phases/faro.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- FASE 5: EL ARCHIVO NEGADO                                 -->
+<!-- ========================================================= -->
+
+<script src="js/scenes/negado/entrada.js?v=12"></script>
+<script src="js/scenes/negado/mapas.js?v=12"></script>
+<script src="js/scenes/negado/despacho.js?v=12"></script>
+<script src="js/scenes/negado/ficheros.js?v=12"></script>
+<script src="js/scenes/negado/deposito.js?v=12"></script>
+<script src="js/scenes/negado/camara.js?v=12"></script>
+
+<script src="js/phases/negado.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- FASE 6: EL RUMBO DE LA CASA                               -->
+<!-- ========================================================= -->
+
+<script src="js/scenes/piloto/zaguan.js?v=12"></script>
+<script src="js/scenes/piloto/patio.js?v=12"></script>
+<script src="js/scenes/piloto/salon.js?v=12"></script>
+<script src="js/scenes/piloto/despacho.js?v=12"></script>
+<script src="js/scenes/piloto/biblioteca.js?v=12"></script>
+<script src="js/scenes/piloto/taller.js?v=12"></script>
+<script src="js/scenes/piloto/jardin.js?v=12"></script>
+<script src="js/scenes/piloto/archivo.js?v=12"></script>
+<script src="js/scenes/piloto/taller_azulejos.js?v=12"></script>
+<script src="js/scenes/piloto/azotea.js?v=12"></script>
+<script src="js/scenes/piloto/azotea_campanas.js?v=12"></script>
+
+<script src="js/phases/piloto.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- MOTOR FINAL                                               -->
+<!-- ========================================================= -->
+
+<script src="js/engine/actions.js?v=12"></script>
+<script src="js/engine/render.js?v=12"></script>
+<script src="js/engine/main.js?v=12"></script>
+
+
+<!-- ========================================================= -->
+<!-- SERVICE WORKER                                            -->
+<!-- ========================================================= -->
+
 <script>
 if ("serviceWorker" in navigator) {
+
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
-      .then(reg => console.log("Service Worker registrado:", reg.scope))
-      .catch(err => console.error("Error Service Worker:", err));
+
+    navigator.serviceWorker.register("./sw.js?v=12", {
+      updateViaCache: "none"
+    })
+
+    .then(reg => {
+
+      console.log(
+        "Service Worker registrado:",
+        reg.scope
+      );
+
+      /*
+       * Fuerza una comprobación de actualización.
+       * No borra datos ni progreso del juego.
+       */
+      reg.update();
+
+    })
+
+    .catch(err => {
+
+      console.error(
+        "Error Service Worker:",
+        err
+      );
+
+    });
+
   });
+
 }
-</script>  
+</script>
+
 </body>
 </html>
